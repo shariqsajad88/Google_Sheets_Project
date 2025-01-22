@@ -35,19 +35,36 @@
         button:hover {
             background-color: #45a049;
         }
-        .error {
-            color: red;
-            margin-bottom: 10px;
+        .message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
         }
     </style>
 </head>
 <body>
     <div class="form-container">
         <h2>Add New Entry</h2>
-        {% if error %}
-            <p class="error">{{ error }}</p>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
         {% endif %}
-        <form method="POST">
+
+        <form method="POST" action="{% url 'save_to_sheet' %}">
             {% csrf_token %}
             <div class="form-field">
                 <label for="name">Name:</label>
@@ -63,8 +80,6 @@
             </div>
             <button type="submit">Submit</button>
         </form>
-        <form method="POST" action="/save/">
-        
     </div>
 </body>
 </html>

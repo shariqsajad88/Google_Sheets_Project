@@ -7,25 +7,30 @@ def get_google_sheet():
     credentials_path = os.path.join(settings.BASE_DIR, 'sheets_integration/credentials.json')
     
     
-    print(f"Looking for credentials at: {credentials_path}")
-    print(f"File exists: {os.path.exists(credentials_path)}")
-    
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
     client = gspread.authorize(creds)
     return client.open_by_key("12c5B4A4nYRHA0-9ouKAag44NWr3rgzldQ2bmRTvcrgo").sheet1
 
-
-
-def save_to_sheet(data):
+def append_to_sheet(data):
+   
     try:
-        print(f"Data received by save_to_sheet: {data}")
         sheet = get_google_sheet()
-        print(f"Google Sheet object: {sheet}")
         
-        # Append data
-        sheet.append_row([data.get('name'), data.get('email'), data.get('phone')])
-        return True, "Data saved successfully."
+        
+        
+        headers = sheet.row_values(1)
+        
+        
+        
+        row_values = [str(data.get(header, '')) for header in headers]
+        
+        
+        
+        sheet.append_row(row_values)
+        
+        
+        return True, "Data saved successfully"
     except Exception as e:
-        print(f"Error in save_to_sheet: {str(e)}")
-        return False, f"An error occurred: {str(e)}"
+        
+        return False, f"Error saving data: {str(e)}"
