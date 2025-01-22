@@ -39,7 +39,7 @@ def save_to_sheet(request):
             sheet.append_row([name, email, phone])
             
             messages.success(request, 'Data saved successfully!')
-            return redirect('fetch_from_sheet')
+            return redirect('save_to_sheet')
             
         except Exception as e:
            
