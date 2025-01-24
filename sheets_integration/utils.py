@@ -3,11 +3,12 @@ from django.conf import settings
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
+
 def get_google_sheet():
     credentials_path = os.path.join(settings.BASE_DIR, 'sheets_integration/credentials.json')
     
     
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    scope = ['https://spreadsheets.google.com/feeds']
     creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
     client = gspread.authorize(creds)
     return client.open_by_key("12c5B4A4nYRHA0-9ouKAag44NWr3rgzldQ2bmRTvcrgo").sheet1

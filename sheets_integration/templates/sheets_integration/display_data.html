@@ -37,12 +37,29 @@
         }
         .add-button:hover {
             background-color: #45a049;
+        
+        }
+        .link-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .link-button:hover {
+            background-color: #45a049;
+        
         }
     </style>
 </head>
 <body>
     <div class="container">
         <a href="{% url 'save_to_sheet' %}" class="add-button">Add New Entry</a>
+        <a href="{% url 'download_sheet' %}" class="link-button">Download Sheet</a>
+        <a href="{% url 'upload_csv' %}" class="link-button">Upload CSV</a>
+
         <table>
             <thead>
                 <tr>
