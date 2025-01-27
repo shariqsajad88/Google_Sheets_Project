@@ -4,6 +4,8 @@ from django.contrib import messages
 from .utils import get_google_sheet
 import csv
 from django.http import HttpResponse
+from .utils import add_google_sheet_data_to_db , fetch_data_from_db
+from .models import User
 
 
 def fetch_from_sheet(request):
@@ -17,18 +19,13 @@ def fetch_from_sheet(request):
 def save_to_sheet(request):
     if request.method == 'POST':
         try:
-            
-            
-            
             name = request.POST.get('name')
             email = request.POST.get('email')
             phone = request.POST.get('phone')
             
-            
             if not all([name, email, phone]):
                 messages.error(request, 'All fields are required')
                 return render(request, 'sheets_integration/add_data.html')
-            
             data = {
                 'name': name,
                 'email': email,
@@ -51,28 +48,33 @@ def save_to_sheet(request):
     return render(request, 'sheets_integration/add_data.html')
 
 
-
-
-def download_sheet(request):
+def download_db_data(request):
     try:
-        sheet = get_google_sheet()
-        records = sheet.get_all_records()
+        
+        records = User.objects.all()
+
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="database_data.csv"'
+
+        
+        fieldnames = ['name', 'email', 'phone']
 
        
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="google_sheet_data.csv"'
-
-        writer = csv.DictWriter(response, fieldnames=records[0].keys())
+        writer = csv.DictWriter(response, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(records)
+        for record in records:
+            writer.writerow({
+                'name': record.name,
+                'email': record.email,
+                'phone': record.phone
+            })
 
         return response
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
     
-
-
-
 
 def upload_csv(request):
     if request.method == 'POST' and request.FILES['csv_file']:
@@ -102,9 +104,26 @@ def upload_csv(request):
                 sheet.append_row(row_values)
 
             messages.success(request, 'CSV data uploaded successfully!')
-            return redirect('fetch_from_sheet')
+            return redirect('show_data_view')
         except Exception as e:
             messages.error(request, f'Error processing the file: {str(e)}')
             return render(request, 'sheets_integration/upload_csv.html')
 
     return render(request, 'sheets_integration/upload_csv.html')
+
+def show_data_view(request):
+    
+    data = fetch_data_from_db()
+
+    
+    context = {'data': data}
+    return render(request, 'sheets_integration/display_data.html', context)
+
+
+def sync_google_sheet(request):
+    try:
+        add_google_sheet_data_to_db()
+        messages.success(request, "Google Sheet data has been synced successfully.")
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+    return redirect('show_data_view') 
